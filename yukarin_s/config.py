@@ -12,6 +12,7 @@ class DatasetConfig:
     phoneme_num: int
     speaker_dict_path: Optional[Path]
     speaker_size: Optional[int]
+    phoneme_type: str
     test_num: int
     test_trial_num: int = 1
     seed: int = 0
@@ -73,4 +74,5 @@ class Config:
 
 
 def backward_compatible(d: Dict[str, Any]):
-    pass
+    if "phoneme_type" not in d["dataset"]:
+        d["dataset"]["phoneme_type"] = "jvs"

@@ -2,10 +2,10 @@ import json
 from dataclasses import dataclass
 from glob import glob
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Type, Union
 
 import numpy
-from acoustic_feature_extractor.data.phoneme import JvsPhoneme
+from acoustic_feature_extractor.data.phoneme import BasePhoneme, phoneme_type_to_class
 from acoustic_feature_extractor.data.sampling_data import SamplingData
 from torch.utils.data._utils.collate import default_convert
 from torch.utils.data.dataset import ConcatDataset, Dataset
@@ -13,19 +13,19 @@ from torch.utils.data.dataset import ConcatDataset, Dataset
 from yukarin_s.config import DatasetConfig
 
 
-
 @dataclass
 class Input:
-    phoneme_list: List[JvsPhoneme]
+    phoneme_list: List[BasePhoneme]
 
 
 @dataclass
 class LazyInput:
     phoneme_list_path: SamplingData
+    phoneme_class: Type[BasePhoneme]
 
     def generate(self):
         return Input(
-            phoneme_list=JvsPhoneme.load_julius_list(self.phoneme_list_path),
+            phoneme_list=self.phoneme_class.load_julius_list(self.phoneme_list_path),
         )
 
 
@@ -40,13 +40,13 @@ class FeatureDataset(Dataset):
 
     @staticmethod
     def extract_input(
-        phoneme_list_data: List[JvsPhoneme],
+        phoneme_list_data: List[BasePhoneme],
         phoneme_num: int,
     ):
         assert len(phoneme_list_data) >= phoneme_num
 
         index = numpy.random.randint(len(phoneme_list_data) - phoneme_num + 1)
-        phoneme_list_data = phoneme_list_data[index:index + phoneme_num]
+        phoneme_list_data = phoneme_list_data[index : index + phoneme_num]
 
         phoneme_list = numpy.array([p.phoneme_id for p in phoneme_list_data])
         phoneme_length = numpy.array([p.end - p.start for p in phoneme_list_data])
@@ -125,6 +125,7 @@ def create_dataset(config: DatasetConfig):
         inputs = [
             LazyInput(
                 phoneme_list_path=phoneme_list_paths[fn],
+                phoneme_class=phoneme_type_to_class[config.phoneme_type],
             )
             for fn in fns
         ]
