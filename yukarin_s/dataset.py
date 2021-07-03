@@ -43,17 +43,37 @@ class FeatureDataset(Dataset):
         phoneme_list_data: List[BasePhoneme],
         phoneme_num: int,
     ):
-        assert len(phoneme_list_data) >= phoneme_num
-
-        index = numpy.random.randint(len(phoneme_list_data) - phoneme_num + 1)
-        phoneme_list_data = phoneme_list_data[index : index + phoneme_num]
+        sampling_length = phoneme_num
+        length = len(phoneme_list_data)
 
         phoneme_list = numpy.array([p.phoneme_id for p in phoneme_list_data])
         phoneme_length = numpy.array([p.end - p.start for p in phoneme_list_data])
 
+        if sampling_length > length:
+            padding_length = sampling_length - length
+            sampling_length = length
+        else:
+            padding_length = 0
+
+        offset = numpy.random.randint(length - sampling_length + 1)
+        offset_slice = slice(offset, offset + sampling_length)
+        phoneme_list = phoneme_list[offset_slice]
+        phoneme_length = phoneme_length[offset_slice]
+        padded = numpy.zeros_like(phoneme_list, dtype=bool)
+
+        pad_pre, pad_post = 0, 0
+        if padding_length > 0:
+            pad_pre = numpy.random.randint(padding_length + 1)
+            pad_post = padding_length - pad_pre
+            pad_list = [pad_pre, pad_post]
+            phoneme_list = numpy.pad(phoneme_list, pad_list)
+            phoneme_length = numpy.pad(phoneme_length, pad_list)
+            padded = numpy.pad(padded, pad_list, constant_values=True)
+
         return dict(
             phoneme_list=phoneme_list.astype(numpy.int64),
             phoneme_length=phoneme_length.astype(numpy.float32),
+            padded=padded,
         )
 
     def __len__(self):
