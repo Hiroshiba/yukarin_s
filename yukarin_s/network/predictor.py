@@ -20,10 +20,6 @@ class Predictor(nn.Module):
 
         super().__init__()
 
-        self.with_speaker = speaker_size > 0
-        self.phoneme_size = phoneme_size
-        self.phoneme_padding_index = phoneme_size
-
         self.phoneme_embedder = nn.Embedding(
             num_embeddings=phoneme_size,
             embedding_dim=phoneme_embedding_size,
@@ -33,7 +29,7 @@ class Predictor(nn.Module):
                 num_embeddings=speaker_size,
                 embedding_dim=speaker_embedding_size,
             )
-            if self.with_speaker
+            if speaker_size > 0
             else None
         )
 
@@ -65,7 +61,7 @@ class Predictor(nn.Module):
         h = self.phoneme_embedder(phoneme_list)  # (batch_size, length, ?)
         h = h.transpose(1, 2)  # (batch_size, ?, length)
 
-        if self.with_speaker:
+        if speaker_id is not None:
             speaker_id = self.speaker_embedder(speaker_id)  # (batch_size, ?)
             speaker_id = speaker_id.unsqueeze(2)  # (batch_size, ?, 1)
             speaker = speaker_id.expand(
