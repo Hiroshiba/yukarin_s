@@ -40,7 +40,7 @@ def create_trainer(
     if config.train.weight_initializer is not None:
         init_weights(model, name=config.train.weight_initializer)
 
-    device = torch.device("cuda")
+    device = torch.device("cuda") if config.train.use_gpu else torch.device("cpu")
     model.to(device)
 
     # dataset
