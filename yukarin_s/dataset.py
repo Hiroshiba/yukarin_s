@@ -2,30 +2,28 @@ import json
 from dataclasses import dataclass
 from glob import glob
 from pathlib import Path
-from typing import Dict, List, Optional, Type, Union
+from typing import Dict, List, Optional, Union
 
 import numpy
-from acoustic_feature_extractor.data.phoneme import BasePhoneme, phoneme_type_to_class
-from acoustic_feature_extractor.data.sampling_data import SamplingData
 from torch.utils.data._utils.collate import default_convert
 from torch.utils.data.dataset import ConcatDataset, Dataset
 
 from yukarin_s.config import DatasetConfig
+from yukarin_s.data.phoneme import OjtPhoneme
 
 
 @dataclass
 class Input:
-    phoneme_list: List[BasePhoneme]
+    phoneme_list: List[OjtPhoneme]
 
 
 @dataclass
 class LazyInput:
-    phoneme_list_path: SamplingData
-    phoneme_class: Type[BasePhoneme]
+    phoneme_list_path: Path
 
     def generate(self):
         return Input(
-            phoneme_list=self.phoneme_class.load_julius_list(self.phoneme_list_path),
+            phoneme_list=OjtPhoneme.load_julius_list(self.phoneme_list_path),
         )
 
 
@@ -40,7 +38,7 @@ class FeatureDataset(Dataset):
 
     @staticmethod
     def extract_input(
-        phoneme_list_data: List[BasePhoneme],
+        phoneme_list_data: List[OjtPhoneme],
         phoneme_num: int,
     ):
         sampling_length = phoneme_num
@@ -142,13 +140,7 @@ def create_dataset(config: DatasetConfig):
     tests = fn_list[:test_num]
 
     def _dataset(fns, for_test=False):
-        inputs = [
-            LazyInput(
-                phoneme_list_path=phoneme_list_paths[fn],
-                phoneme_class=phoneme_type_to_class[config.phoneme_type],
-            )
-            for fn in fns
-        ]
+        inputs = [LazyInput(phoneme_list_path=phoneme_list_paths[fn]) for fn in fns]
 
         dataset = FeatureDataset(inputs=inputs, phoneme_num=config.phoneme_num)
 

@@ -2,4 +2,3 @@ numpy
 torch
 tqdm
 pyyaml
-git+https://github.com/Hiroshiba/acoustic_feature_extractor
