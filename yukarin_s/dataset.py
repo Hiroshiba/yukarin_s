@@ -1,6 +1,7 @@
 import json
 from dataclasses import dataclass
 from glob import glob
+from os import PathLike
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
@@ -10,6 +11,7 @@ from torch.utils.data.dataset import ConcatDataset, Dataset
 
 from yukarin_s.config import DatasetConfig
 from yukarin_s.data.phoneme import OjtPhoneme
+from yukarin_s.utility.dataset_utility import CachePath
 
 
 @dataclass
@@ -19,11 +21,13 @@ class Input:
 
 @dataclass
 class LazyInput:
-    phoneme_list_path: Path
+    phoneme_list_path: PathLike
 
     def generate(self):
         return Input(
-            phoneme_list=OjtPhoneme.load_julius_list(self.phoneme_list_path),
+            phoneme_list=OjtPhoneme.load_julius_list(
+                self.phoneme_list_path, verify=False
+            ),  # TODO: verify=Trueにする
         )
 
 
@@ -140,7 +144,9 @@ def create_dataset(config: DatasetConfig):
     tests = fn_list[:test_num]
 
     def _dataset(fns, for_test=False):
-        inputs = [LazyInput(phoneme_list_path=phoneme_list_paths[fn]) for fn in fns]
+        inputs = [
+            LazyInput(phoneme_list_path=CachePath(phoneme_list_paths[fn])) for fn in fns
+        ]
 
         dataset = FeatureDataset(inputs=inputs, phoneme_num=config.phoneme_num)
 
