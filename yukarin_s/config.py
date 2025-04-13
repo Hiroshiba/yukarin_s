@@ -8,7 +8,8 @@ from yukarin_s.utility.git_utility import get_branch_name, get_commit_id
 
 @dataclass
 class DatasetConfig:
-    phoneme_list_glob: str
+    root_dir: Path
+    phoneme_list_pathlist_path: Path
     phoneme_num: int
     speaker_dict_path: Optional[Path]
     speaker_size: Optional[int]

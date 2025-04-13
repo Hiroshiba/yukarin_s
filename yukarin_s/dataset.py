@@ -1,6 +1,5 @@
 import json
 from dataclasses import dataclass
-from glob import glob
 from os import PathLike
 from pathlib import Path
 from typing import Dict, List, Optional, Union
@@ -118,8 +117,15 @@ class TensorWrapperDataset(Dataset):
         return default_convert(self.dataset[i])
 
 
+def _load_pathlist(path: Path, root_dir: Path) -> Dict[str, Path]:
+    path_list = [root_dir / p for p in path.read_text().splitlines()]
+    return {p.stem: p for p in path_list}
+
+
 def create_dataset(config: DatasetConfig):
-    phoneme_list_paths = {Path(p).stem: Path(p) for p in glob(config.phoneme_list_glob)}
+    phoneme_list_paths = _load_pathlist(
+        config.phoneme_list_pathlist_path, config.root_dir
+    )
     fn_list = sorted(phoneme_list_paths.keys())
     assert len(fn_list) > 0
 
