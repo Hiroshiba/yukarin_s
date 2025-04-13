@@ -78,3 +78,12 @@ class Config:
 def backward_compatible(d: Dict[str, Any]):
     if "phoneme_type" not in d["dataset"]:
         d["dataset"]["phoneme_type"] = "jvs"
+
+    if "root_dir" not in d["dataset"]:
+        d["dataset"]["root_dir"] = Path(".")
+    for before_key in [
+        "phoneme_list_glob",
+    ]:
+        if before_key in d["dataset"]:
+            after_key = before_key.replace("_glob", "_pathlist_path")
+            d["dataset"][after_key] = d["dataset"].pop(before_key)
