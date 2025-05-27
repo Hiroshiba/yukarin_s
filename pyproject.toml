@@ -3,20 +3,27 @@ name = "yukarin_s"
 version = "0.1.0"
 requires-python = "~=3.8.20"
 dependencies = [
-    "numpy>=1.24.4",
-    "pyyaml>=6.0.2",
-    "torch==1.13.1",
-    "tqdm>=4.67.1",
-    "setuptools<65", # macOSでpytorch_trainer内のnumpyがエラーを出すため
+    "numpy",
+    "pyyaml",
+    "torch",
+    "tqdm",
 ]
 
 [dependency-groups]
 dev = [
+    "numpy>=1.24.4",
     "pytest>=8.3.5",
     "pytorch-trainer",
+    "pyyaml>=6.0.2",
+    "setuptools<65", # macOSでpytorch_trainer内のnumpyがエラーを出すため
     "tensorboardx>=2.6.2.2",
+    "torch==1.13.1",
+    "tqdm>=4.67.1",
     "wandb>=0.19.9",
 ]
+
+[tool.setuptools.packages.find]
+include = ["yukarin_s*"]
 
 [tool.uv.sources]
 pytorch-trainer = { git = "https://github.com/Hiroshiba/pytorch-trainer", rev = "1.3.3" }
