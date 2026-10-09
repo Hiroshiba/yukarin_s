@@ -3,7 +3,7 @@ from typing import Any, Dict
 
 import wandb
 from pytorch_trainer.training import Extension, Trainer
-from tensorboardX import SummaryWriter
+from torch.utils.tensorboard import SummaryWriter
 
 
 def _flatten_dict(dd, separator="/", prefix=""):
@@ -24,7 +24,7 @@ class TensorboardReport(Extension):
 
     def __call__(self, trainer: Trainer):
         if self.writer is None:
-            self.writer = SummaryWriter(Path(trainer.out))
+            self.writer = SummaryWriter(log_dir=Path(trainer.out))
 
         observations = trainer.observation
         n_iter = trainer.updater.iteration
@@ -34,6 +34,7 @@ class TensorboardReport(Extension):
     def finalize(self):
         super().finalize()
         self.writer.flush()
+        self.writer.close()
 
 
 class WandbReport(Extension):

@@ -9,9 +9,9 @@ import yaml
 from pytorch_trainer.iterators import MultiprocessIterator
 from pytorch_trainer.training import Trainer, extensions
 from pytorch_trainer.training.updaters import StandardUpdater
-from tensorboardX import SummaryWriter
 from torch import optim
 from torch.optim.optimizer import Optimizer
+from torch.utils.tensorboard import SummaryWriter
 
 from yukarin_s.config import Config
 from yukarin_s.dataset import create_dataset
@@ -87,7 +87,7 @@ def create_trainer(
     )
 
     trainer = Trainer(updater, stop_trigger=trigger_stop, out=output)
-    writer = SummaryWriter(Path(output))
+    writer = SummaryWriter(log_dir=Path(output))
 
     ext = extensions.Evaluator(test_iter, model, device=device)
     trainer.extend(ext, name="test", trigger=trigger_log)

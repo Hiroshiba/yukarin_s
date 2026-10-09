@@ -16,7 +16,7 @@ dev = [
     "pytorch-trainer",
     "pyyaml>=6.0.2",
     "setuptools<65", # macOSでpytorch_trainer内のnumpyがエラーを出すため
-    "tensorboardx>=2.6.2.2",
+    "tensorboard>=2.14.0",
     "torch==1.13.1",
     "tqdm>=4.67.1",
     "wandb>=0.19.9",
